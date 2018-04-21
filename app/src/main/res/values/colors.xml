@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#5e2c7f</color>
+    <color name="colorPrimaryDark">#501a75</color>
+    <color name="colorAccent">#02a3dc</color>
+    <color name="white">#ffffff</color>
+    <color name="whiteAlpha">#87ffffff</color>
+    <color name="background">#3e3c41</color>
+    <color name="pieGreen">#82d173</color>
+    <color name="pieYellow">#ffc857</color>
+    <color name="pieRed">#f87060</color>
+    <color name="colorText">#ffffff</color>
+    <!--
+    <color name="colorWeb">#6B1560</color>
+    <color name="colorPrimary">#5e2c7f</color>
+
+    -->
+
+
+
+</resources>

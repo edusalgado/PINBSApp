@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="2dp" android:color="@android:color/transparent" />
+
+            <padding android:left="2dp"
+                android:top="2dp"
+                android:right="2dp"
+                android:bottom="2dp" />
+            <gradient
+                android:endColor="@color/colorPrimary"
+                android:startColor="#786387"
+
+                android:angle="90"/>
+            <corners android:radius="5dp" />
+        </shape>
+    </item>
+
+    <item android:drawable="@drawable/ic_error_outline_black_24dp"
+        android:width="30dp"
+        android:height="30dp"
+        android:gravity="center" />
+</layer-list>

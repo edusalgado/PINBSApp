@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">PINBS App</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string-array name="arrayPatients">
+        <item>Andriy</item>
+        <item>Emmanuel</item>
+        <item>Mark</item>
+        <item>Alison</item>
+        <item>Oksana</item>
+        <item>Sergi</item>
+        <item>Kevin</item>
+        <item>Rat</item>
+        <item>Baby1</item>
+        <item>Baby2</item>
+        <item>Baby3</item>
+        <item>Baby3</item>
+        <item>Baby3</item>
+        <item>Baby3</item>
+        <item>Baby3</item>
+        <item>Baby3</item>
+
+    </string-array>
+</resources>
