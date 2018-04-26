@@ -35,6 +35,7 @@ import java.util.List;
 import Utilities.CustomMarkerSonify;
 import Utilities.DataHelper;
 import Utilities.MyCustomFillFormatter;
+import ie.ucc.salgadoe.pinbsapp.audio.VocoderPlayer;
 
 
 public class FastCheckDialog extends DialogFragment {
@@ -42,6 +43,7 @@ public class FastCheckDialog extends DialogFragment {
     Bundle mArgs;
 
     private DataHelper data;
+    private DataHelper vocoderData;
     private TextView time_selected;
     private Button play,pause;
     private DateFormat datef = new SimpleDateFormat("HH:mm:ss");
@@ -51,12 +53,15 @@ public class FastCheckDialog extends DialogFragment {
 
     float seizure_limits[];
     ArrayList<Double> input  = new ArrayList<>();
+    ArrayList<Double> vocoder = new ArrayList<>();
     List<Entry> eeg = new ArrayList<>();
     List<Entry> seizure1 = new ArrayList<>();
     List<Entry> seizure2 = new ArrayList<>();
     List<Entry> seizure3 = new ArrayList<>();
     List<Entry> seizure4 = new ArrayList<>();
     List<Entry> seizure5 = new ArrayList<>();
+    VocoderPlayer vocoderPlayer = new VocoderPlayer();
+
 
 
     @Override
@@ -68,9 +73,9 @@ public class FastCheckDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View mainView = inflater.inflate(R.layout.eeg_visualization_mp, null);
-        time_selected = (TextView) mainView.findViewById(R.id.textViewhour);
-        play = (Button) mainView.findViewById(R.id.buttonplay);
-        pause = (Button) mainView.findViewById(R.id.buttonpause);
+        time_selected =  mainView.findViewById(R.id.textViewhour);
+        play = mainView.findViewById(R.id.buttonplay);
+        pause =  mainView.findViewById(R.id.buttonpause);
         final Animation animScale = AnimationUtils.loadAnimation(getContext(),R.anim.anim_scale);
 
         //Clear arrays if is the second time user clicks the box
@@ -86,12 +91,17 @@ public class FastCheckDialog extends DialogFragment {
         mArgs = getArguments();
         data = (DataHelper) mArgs.getSerializable("input");
         input = data.getList();
+        vocoderData = (DataHelper) mArgs.getSerializable("vocoder");
+        vocoder = vocoderData.getList();
+
         seizure_limits = mArgs.getFloatArray("limits");
         num_seizures_detected = mArgs.getInt("Seizures detected");
         position = mArgs.getInt("Center");
 
         builder.setView(mainView);
         builder.setTitle("EEG Visualization tool");
+        vocoderPlayer.setSamples(vocoder);
+
         float seizure_start_end_points[][] = new float[num_seizures_detected][2];
         for(int i = 0; i<num_seizures_detected;i++){
             seizure_start_end_points[i][0] = seizure_limits[i*2];
@@ -267,6 +277,7 @@ public class FastCheckDialog extends DialogFragment {
         lineChart1.setDrawMarkers(true);
         CustomMarkerSonify marker = new CustomMarkerSonify(getContext(),R.layout.sonify_marker);
         lineChart1.setMarker(marker);
+        vocoderPlayer.configurePlayer(16000);
 
         lineChart1.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
@@ -296,6 +307,8 @@ public class FastCheckDialog extends DialogFragment {
                     //Creo que moviendo el highlight dentro de un for puede funcionar, sobretodo cuando la pantalla esta zoom out al maximo donde no hay rango para hacer un moveview to con animacion.
                     lineChart1.moveViewToAnimated(xvalue+256,0f, YAxis.AxisDependency.LEFT,8000);
                 }
+
+                vocoderPlayer.runTest();
             }
         });
         pause.setOnClickListener(new View.OnClickListener() {
