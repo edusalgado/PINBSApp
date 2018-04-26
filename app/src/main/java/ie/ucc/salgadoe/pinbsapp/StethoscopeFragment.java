@@ -46,8 +46,6 @@ import Utilities.CNN;
 import Utilities.CustomMarkerCNN;
 import Utilities.DataHelper;
 import Utilities.ProgressBarAnimation;
-import ie.ucc.salgadoe.pinbsapp.audio.PhaseVocoderRunnable;
-import ie.ucc.salgadoe.pinbsapp.audio.VocoderPlayer;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -62,7 +60,6 @@ public class StethoscopeFragment extends Fragment {
     int speed = 0;
     int inputlen;
     int progressStatus = 0;
-    int chunkLength;
     Spinner options, baby, sp_speed;
     ListView list;
     Button b_next, b_stop,b_reset; //resp_adapt
@@ -75,7 +72,6 @@ public class StethoscopeFragment extends Fragment {
     CNN resp = new CNN();
 
     int counter = 0;
-    int counter_sonification = 0;
     int position_flag;
 
     Bundle args = new Bundle();
@@ -143,11 +139,6 @@ public class StethoscopeFragment extends Fragment {
     private Runnable feedEeg;
 
     private Handler handler_progress = new Handler();
-
-    /*Sonification cosis */
-
-    private PhaseVocoderRunnable vocoder = new PhaseVocoderRunnable();
-    private VocoderPlayer vocoderPlayer = new VocoderPlayer();
 
 
     public void readFiles11() {
@@ -863,7 +854,7 @@ public class StethoscopeFragment extends Fragment {
 
         //SPINNER CODE
         options = (Spinner) view.findViewById(R.id.sp01);
-        final String[] values = new String[]{
+        String[] values = new String[]{
                 "none"," 8_1"," 8_4"," 8_8"
         };
 
@@ -1019,7 +1010,7 @@ public class StethoscopeFragment extends Fragment {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Setting the vocoder vector to the player
+
                 //TODO add progress bar "loading" to avoid double click while processing
                 float seizure_limits [] = new float[2*num_seizures_detected];
                 for(int i = 0; i<num_seizures_detected;i++) {
@@ -1031,8 +1022,6 @@ public class StethoscopeFragment extends Fragment {
                 args.putFloatArray("limits",seizure_limits);
                 args.putInt("Seizures detected",num_seizures_detected);
                 args.putInt("Center", position);
-                args.putSerializable("vocoder", new DataHelper(vocoder.getVocoderSamples()));
-
                 /*ReviewModeFragment ReviewMode = new ReviewModeFragment();
                 ReviewMode.setArguments(args);
                 FragmentManager fragmentManager = getFragmentManager();
@@ -1104,9 +1093,6 @@ public class StethoscopeFragment extends Fragment {
                     Toast.makeText(getActivity(), "Acquisition is running. To start a new acquisition press STOP button!", Toast.LENGTH_LONG).show();
                 } else {
 
-                    final double[] PVInput = new double[chunkLength];
-
-
                     //THREAD EEG TIME DOMAIN
                     //TODO add noise to generate fake audio signal ( - player????? mp3 WAV??) sampling rate
                     feedEeg = new Runnable() {
@@ -1116,18 +1102,9 @@ public class StethoscopeFragment extends Fragment {
                             //for (int i = position; i < (256 + position); i++) {
                                 //input[tiempo_aux - position][0] = finput[tiempo_aux][0];
                                 //input_buffer.add(finput[tiempo_aux][0]);
-
-                            //TODO this thread can work as the main if we fill a buffer to send to scan thread with a counter and if sentence taking into account shift value!!
+                                //TODO this thread can work as the main if we fill a buffer to send to scan thread with a counter and if sentence taking into account shift value!!
                                 addEntryEeg((float)finput[position][0]);
                                 input_buffer.add(position,finput[position][0]);
-                                PVInput[counter_sonification] = finput[position][0];
-
-                                if(chunkLength == counter_sonification + 1){
-                                    vocoder.readNextChunk(PVInput);
-                                    vocoder.run();
-                                    counter_sonification = 0;
-                                }
-
                                 //Todo entender porq no funciona si cambio de shift, el problema esta aqui creo que tiene que ver con la arquitectura de condiciones. (Si se cambia al shift 1 cuando counter es mayor a 32 por ejemplo)
                                 if(shift_value == 1 && counter == 32){
                                     position_flag = position - 256;
@@ -1144,7 +1121,6 @@ public class StethoscopeFragment extends Fragment {
                                     mTimer.run();
                                     counter =0;
                                 } else counter ++;
-                                counter_sonification++;
                                 position ++;
                             //}
                             //input4network = input;
@@ -1284,24 +1260,6 @@ public class StethoscopeFragment extends Fragment {
 
                                 }
                             });
-
-                            /* Configurando phasevocoder */
-
-                            vocoder.configure();
-
-                            /*inicializando chunk y vocoder */
-                            chunkLength = vocoder.getChunkLength();
-
-                            double[] chunk = new double[chunkLength];
-                            for(int i =0; i < vocoder.getHop(); i++){
-                                chunk[i] = 0;
-                            }
-                            for (int i = vocoder.getHop(); i < chunkLength; i++){
-                                chunk[i] = input_buffer.get((position-chunkLength-vocoder.getHop())+i);
-                            }
-                            vocoder.initialiseVocoder(chunk);
-
-
 
                             buffer_aux = 1;
                             handler_buffer.postDelayed(this,10);
