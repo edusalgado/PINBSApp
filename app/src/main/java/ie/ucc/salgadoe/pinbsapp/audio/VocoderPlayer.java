@@ -6,7 +6,6 @@ import android.media.AudioTrack;
 import android.os.Build;
 
 import java.util.ArrayList;
-import java.util.DoubleSummaryStatistics;
 
 import ie.ucc.salgadoe.pinbsapp.data.DataConverter;
 
@@ -18,7 +17,6 @@ public class VocoderPlayer {
 
     final int bufferPlayer = 2;// buffer Audio-player [seconds] --> no tengo nidea pa que sirve
     private AudioTrack mTrack;
-    PhaseVocoderRunnable mVocoder = new PhaseVocoderRunnable();
     ArrayList<Double> samplesList = new ArrayList<>();
 
     public void configurePlayer(int outputSamplingRate){
@@ -76,6 +74,7 @@ public class VocoderPlayer {
     public void playEEG(){
         mTrack.play();
     }
+
     public void pausePlayer(){
         mTrack.pause();
     }

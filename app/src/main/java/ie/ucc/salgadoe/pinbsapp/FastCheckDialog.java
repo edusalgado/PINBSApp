@@ -1,10 +1,12 @@
 package ie.ucc.salgadoe.pinbsapp;
 
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -41,6 +44,8 @@ import ie.ucc.salgadoe.pinbsapp.audio.VocoderPlayer;
 public class FastCheckDialog extends DialogFragment {
 
     Bundle mArgs;
+    TextView status_box;
+    ProgressBar statusBar;
 
     private DataHelper data;
     private DataHelper vocoderData;
@@ -76,6 +81,8 @@ public class FastCheckDialog extends DialogFragment {
         time_selected =  mainView.findViewById(R.id.textViewhour);
         play = mainView.findViewById(R.id.buttonplay);
         pause =  mainView.findViewById(R.id.buttonpause);
+        status_box = mainView.findViewById(R.id.message_box_fast_check);
+        statusBar = mainView.findViewById(R.id.progressBarFastCheck);
         final Animation animScale = AnimationUtils.loadAnimation(getContext(),R.anim.anim_scale);
 
         //Clear arrays if is the second time user clicks the box
@@ -101,6 +108,9 @@ public class FastCheckDialog extends DialogFragment {
         builder.setView(mainView);
         builder.setTitle("EEG Visualization tool");
         vocoderPlayer.setSamples(vocoder);
+        statusBar.setMax(vocoder.size());
+        statusBar.setProgress(0);
+        statusBar.setVisibility(View.INVISIBLE);
 
         float seizure_start_end_points[][] = new float[num_seizures_detected][2];
         for(int i = 0; i<num_seizures_detected;i++){
@@ -299,6 +309,7 @@ public class FastCheckDialog extends DialogFragment {
             }
         });
         play.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("StaticFieldLeak")
             @Override
             public void onClick(View v) {
                 v.startAnimation(animScale);
@@ -308,13 +319,15 @@ public class FastCheckDialog extends DialogFragment {
                     lineChart1.moveViewToAnimated(xvalue+256,0f, YAxis.AxisDependency.LEFT,8000);
                 }
 
-                vocoderPlayer.runTest();
+                //todo que funcione play y pause en paralelo sin congelar pantalla
+
             }
         });
         pause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 v.startAnimation(animScale);
+                vocoderPlayer.pausePlayer();
             }
         });
 
@@ -334,6 +347,7 @@ public class FastCheckDialog extends DialogFragment {
 
 
     }
+
 
 }
 

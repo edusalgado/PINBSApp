@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -65,7 +66,7 @@ public class StethoscopeFragment extends Fragment {
     int chunkLength;
     Spinner options, baby, sp_speed;
     ListView list;
-    Button b_next, b_stop,b_reset; //resp_adapt
+    Button b_next, b_stop,b_reset,b_soni;
     TextView tv_output;
     TextView tv_output2, message_box, time;
     SeekBar sb;
@@ -1051,6 +1052,7 @@ public class StethoscopeFragment extends Fragment {
         b_next = (Button) view.findViewById(R.id.b_next);
         b_stop = (Button) view.findViewById(R.id.b_stop);
         b_reset = (Button) view.findViewById(R.id.b_reset);
+        b_soni = view.findViewById(R.id.btn_soni);
 
         tv_output2 = (TextView) view.findViewById(R.id.tv_output2);
         time= (TextView) view.findViewById(R.id.time);
@@ -1059,6 +1061,9 @@ public class StethoscopeFragment extends Fragment {
         final ImageView traffic = (ImageView) view.findViewById(R.id.imageView_traffic_light);
         final Handler handler_buffer = new Handler();
         final Handler handler_time = new Handler();
+
+        vocoderPlayer.configurePlayer(16000);
+
 
         //RADIO GROUP
 
@@ -1123,9 +1128,11 @@ public class StethoscopeFragment extends Fragment {
                                 PVInput[counter_sonification] = finput[position][0];
 
                                 if(chunkLength == counter_sonification + 1){
-                                    vocoder.readNextChunk(PVInput);
-                                    vocoder.run();
                                     counter_sonification = 0;
+                                    /*vocoder.readNextChunk(PVInput);
+                                    vocoder.run();
+                                    */
+                                    new executeVocoder().execute(PVInput);
                                 }
 
                                 //Todo entender porq no funciona si cambio de shift, el problema esta aqui creo que tiene que ver con la arquitectura de condiciones. (Si se cambia al shift 1 cuando counter es mayor a 32 por ejemplo)
@@ -1618,6 +1625,14 @@ public class StethoscopeFragment extends Fragment {
             }
         });
 
+        b_soni.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vocoderPlayer.setSamples(vocoder.getVocoderSamples());
+                vocoderPlayer.runTest();
+            }
+        });
+
 
         b_reset.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1779,5 +1794,56 @@ public class StethoscopeFragment extends Fragment {
         verticalBar.startAnimation(anim);
         //verticalBar.setProgress((int)(prob*1000));
     }
+    private class executeVocoder extends AsyncTask<double[],Void,Void>{
+        @Override
+        protected Void doInBackground(double[]... params) {
+            for (int i = 0; i < 5; i++) {
+                vocoder.readNextChunk(params[0]);
+                vocoder.run();
+            }
+            return  null;
 
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+        }
+
+        @Override
+        protected void onPreExecute() {
+            message_box.setText("Sonifying");
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {}
+    }
+
+    private class playSonification extends  AsyncTask<Void,Void,Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            vocoderPlayer.setSamples(vocoder.getVocoderSamples());
+            vocoderPlayer.runTest();
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            message_box.setText("Preparing audio");
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            message_box.setText("Playing...");
+        }
+    }
 }
+
+
