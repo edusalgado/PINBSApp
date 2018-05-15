@@ -1034,13 +1034,6 @@ public class StethoscopeFragment extends Fragment {
                 args.putInt("Center", position);
                 args.putSerializable("vocoder", new DataHelper(vocoder.getVocoderSamples()));
 
-                /*ReviewModeFragment ReviewMode = new ReviewModeFragment();
-                ReviewMode.setArguments(args);
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.frameLayout, ReviewMode);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();*/
                 dialog.setArguments(args);
                 dialog.show(getFragmentManager(),"MyDialogFragmentTag");
             }
@@ -1068,7 +1061,7 @@ public class StethoscopeFragment extends Fragment {
         //RADIO GROUP
 
         radioGroup = (RadioGroup) view.findViewById(R.id.radioGroup);
-        //TODO: add option to avoid layer changing in the middle of the acquisition
+        //FIXME: add option to avoid layer changing in the middle of the acquisition
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -1113,7 +1106,6 @@ public class StethoscopeFragment extends Fragment {
 
 
                     //THREAD EEG TIME DOMAIN
-                    //TODO add noise to generate fake audio signal ( - player????? mp3 WAV??) sampling rate
                     feedEeg = new Runnable() {
                         @Override
                         public void run() {
