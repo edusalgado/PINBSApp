@@ -95,9 +95,10 @@ Things to fix/change and new features to add
 The improvements listed bellow, are the result of the usability study carried out by Montserrat Anglés.
 
 1. We should add a tool for measuring the amplitude from peak to peak and the time that it lasts. You should be able to touch to points on the screen and a pop up message will show you the Vpp and the duration.
-<img src="/docs/apprat.png" alt=""/>
 
    - [ ] Done.
+
+<img src="/docs/apprat.png" alt=""/>
 
 2. The graphs should be always vertically centred. We have to be able to scroll forward and backwards but not up and down.
 
