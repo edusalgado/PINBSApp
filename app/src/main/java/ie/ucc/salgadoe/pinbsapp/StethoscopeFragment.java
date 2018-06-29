@@ -7,6 +7,8 @@ import android.graphics.Shader;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +38,6 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -125,6 +126,11 @@ public class StethoscopeFragment extends Fragment {
     private ArrayAdapter<String> adapter;
     private ArrayList<String> arrayList;
 
+    final Calendar timer = new GregorianCalendar();
+    final DateFormat datef = new SimpleDateFormat("HH:mm:ss");
+
+
+    ImageView traffic;
     int count=0;
     String minute = "";
     String aux_time="";
@@ -145,7 +151,7 @@ public class StethoscopeFragment extends Fragment {
 
     private Handler handler_progress = new Handler();
 
-    /*Sonification cosis */
+    /* Sonification */
 
     private PhaseVocoderRunnable vocoder = new PhaseVocoderRunnable();
     private VocoderPlayer vocoderPlayer = new VocoderPlayer();
@@ -752,7 +758,7 @@ public class StethoscopeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.stetoscope_fragment, container, false);
+        final View view = inflater.inflate(R.layout.stetoscope_fragment, container, false);
 
         //CHART 1
         mChart = (LineChart) view.findViewById(R.id.chart);
@@ -828,8 +834,7 @@ public class StethoscopeFragment extends Fragment {
         mChart2.invalidate();
 
 
-        final Calendar timer = new GregorianCalendar();
-        final DateFormat datef = new SimpleDateFormat("HH:mm:ss");
+
 
         //SEEKBAR CODE
 
@@ -868,7 +873,8 @@ public class StethoscopeFragment extends Fragment {
                 "none"," 8_1"," 8_4"," 8_8"
         };
 
-        ArrayAdapter<String> adapter2 = new ArrayAdapter(getActivity(),R.layout.spinner_item, values){
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item, values){
+            @NonNull
             @Override
             public View getDropDownView(int position, View convertView,
                                         ViewGroup parent) {
@@ -921,7 +927,7 @@ public class StethoscopeFragment extends Fragment {
          final String[] babies = new String[]{
                  "none"," 01"," 02"," 03"
          };
-        ArrayAdapter<String> adapter3 = new ArrayAdapter(getActivity(),R.layout.spinner_item, babies){
+        ArrayAdapter<String> adapter3 = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item, babies){
             @Override
             public View getDropDownView(int position, View convertView,
                                         ViewGroup parent) {
@@ -973,7 +979,7 @@ public class StethoscopeFragment extends Fragment {
         final String[] speeds = new String[]{
                 "Test mode","Real time"
         };
-        ArrayAdapter<String> adapter4 = new ArrayAdapter(getActivity(),R.layout.spinner_item, speeds)
+        ArrayAdapter<String> adapter4 = new ArrayAdapter<String>(getActivity(),R.layout.spinner_item, speeds)
         {@Override
         public View getDropDownView(int position, View convertView,
                                     ViewGroup parent) {
@@ -1010,10 +1016,21 @@ public class StethoscopeFragment extends Fragment {
         //List
 
         View empty = view.findViewById(R.id.empty);
-        list = (ListView) view.findViewById(R.id.seizurelist);
+        list = view.findViewById(R.id.seizurelist);
         list.bringToFront();
         arrayList = new ArrayList<>();
-        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, arrayList);
+        adapter = new ArrayAdapter<String>(getContext(), R.layout.custom_textview_list, arrayList){
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+
+
+                //textView.setTextColor(Color.WHITE);
+
+                return view;
+            }
+        };
         list.setAdapter(adapter);
         list.setEmptyView(empty);
 
@@ -1042,16 +1059,16 @@ public class StethoscopeFragment extends Fragment {
 
 
 
-        b_next = (Button) view.findViewById(R.id.b_next);
-        b_stop = (Button) view.findViewById(R.id.b_stop);
-        b_reset = (Button) view.findViewById(R.id.b_reset);
+        b_next = view.findViewById(R.id.b_next);
+        b_stop =  view.findViewById(R.id.b_stop);
+        b_reset =  view.findViewById(R.id.b_reset);
         b_soni = view.findViewById(R.id.btn_soni);
 
-        tv_output2 = (TextView) view.findViewById(R.id.tv_output2);
-        time= (TextView) view.findViewById(R.id.time);
-        tv_output = (TextView) view.findViewById(R.id.tv_output);
-        message_box = (TextView) view.findViewById(R.id.message_box);
-        final ImageView traffic = (ImageView) view.findViewById(R.id.imageView_traffic_light);
+        tv_output2 =  view.findViewById(R.id.tv_output2);
+        time=  view.findViewById(R.id.time);
+        tv_output =  view.findViewById(R.id.tv_output);
+        message_box =  view.findViewById(R.id.message_box);
+        traffic =  view.findViewById(R.id.imageView_traffic_light);
         final Handler handler_buffer = new Handler();
         final Handler handler_time = new Handler();
 
@@ -1060,7 +1077,7 @@ public class StethoscopeFragment extends Fragment {
 
         //RADIO GROUP
 
-        radioGroup = (RadioGroup) view.findViewById(R.id.radioGroup);
+        radioGroup =  view.findViewById(R.id.radioGroup);
         //FIXME: add option to avoid layer changing in the middle of the acquisition
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -1084,11 +1101,11 @@ public class StethoscopeFragment extends Fragment {
 
         //PROGRESSBAR
 
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        progressBar =  view.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
         //Vertical Bar
-        verticalBar = (ProgressBar) view.findViewById(R.id.vertical_progressbar);
+        verticalBar =  view.findViewById(R.id.vertical_progressbar);
         verticalBar.setProgress(0);
 
         message_box.setText("CHOOSE A NETWORK TO START!");
@@ -1124,23 +1141,26 @@ public class StethoscopeFragment extends Fragment {
                                     /*vocoder.readNextChunk(PVInput);
                                     vocoder.run();
                                     */
-                                    new executeVocoder().execute(PVInput);
+                                    //new executeVocoder().execute(PVInput);
                                 }
 
                                 //Todo entender porq no funciona si cambio de shift, el problema esta aqui creo que tiene que ver con la arquitectura de condiciones. (Si se cambia al shift 1 cuando counter es mayor a 32 por ejemplo)
                                 if(shift_value == 1 && counter == 32){
                                     position_flag = position - 256;
-                                    mTimer.run();
+                                    new runCnn().execute();
+                                    //mTimer.run();
                                     counter = 0;
                                 }
                                 if(shift_value == 4 && counter == 128){
                                     position_flag = position -256;
-                                    mTimer.run();
+                                    //mTimer.run();
+                                    new runCnn().execute();
                                     counter = 0;
                                 }
                                 if(shift_value == 8 && counter == 256){
                                     position_flag = position - 256;
-                                    mTimer.run();
+                                    //mTimer.run();
+                                    new runCnn().execute();
                                     counter =0;
                                 } else counter ++;
                                 counter_sonification++;
@@ -1313,7 +1333,8 @@ public class StethoscopeFragment extends Fragment {
                     };
 
                     //THREAD SCAN
-
+                    //THIS METHOD IS IMPLEMENTED ABOVE WITH ASYNKTASK ACHIEVING BETTER PERFORMANCE
+                    /*
                     mTimer = new Runnable() {
                         @Override
                         public void run() {
@@ -1525,6 +1546,7 @@ public class StethoscopeFragment extends Fragment {
 
 
                     };
+                    */
 
 
                     if (layers_6_11 == -1) {
@@ -1835,6 +1857,197 @@ public class StethoscopeFragment extends Fragment {
             super.onPostExecute(aVoid);
             message_box.setText("Playing...");
         }
+    }
+
+    //Esto va a ser para probar asynktask en el main thread y ver si es posible evitar los parones de UI. PARECE QUE FUNCIONA CORRECTAMENTE
+    //IMP adaptacion respiracion no implementada en dicho metodo. O extraer del anterior o obviarla momentaneamente.
+
+    private class runCnn extends  AsyncTask<Void,Double,Double>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            b_next.setText("Scanning...");
+            tv_output.setText(null);
+            tv_output2.setText(null);
+            CustomMarkerCNN marker = new CustomMarkerCNN(getContext(),R.layout.cnn_marker,shift_value);
+            mChart2.setMarker(marker);
+        }
+        @Override
+        protected Double doInBackground(Void... voids) {
+            double[][] input = new double[256][1];
+            double prob = 0;
+
+            for (int i = position_flag; i < (256 + position_flag); i++) {
+                input[i - position_flag][0] = input_buffer.get(i);
+            }
+            if(layers_6_11==0) prob = sixLayersCnn(input);
+            if(layers_6_11==1) prob = elevenLayersCnn(input);
+            resp_adaptation.add(prob);
+            publishProgress(prob);
+
+            return prob;
+        }
+
+        @Override
+        protected void onProgressUpdate(Double... values) {
+            fillMeter(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Double prob) {
+            //TOdo no se esta sumando el tiempo en la lista de epilepsias registradas
+            //RED
+            if (prob >= th_value) {
+                if (count == 0) {
+                    Calendar maf_time; //Auxiliar variable to plus the collar time and not changing the real time value.
+                    maf_time = (Calendar) timer.clone();
+                    maf_time.add(Calendar.SECOND, -24);
+                    minute = datef.format(maf_time.getTime());
+                    maf_time.add(Calendar.SECOND,48); //In case seizure in only one epoch!
+                    aux_time = datef.format(maf_time.getTime());
+                    array4seizures[list_position][0] = position_flag - 768 -768; // - samples in 24s MAF, - position updated to the center maf point.
+                    array4seizures[list_position][1] = position_flag;//In case only one epoch of seizure + 768 24s MAF
+                }
+                if (count > 0) {
+                    Calendar maf_time; //Auxiliar variable to plus the collar time and not changing the real time value.
+                    maf_time = (Calendar) timer.clone();
+                    maf_time.add(Calendar.SECOND, 24);
+                    aux_time = datef.format(maf_time.getTime());
+                    array4seizures[list_position][1] = position_flag; //  +768 - 768!!!!
+                }
+                count++;
+
+                traffic.setBackgroundResource(R.drawable.traffic_light_red_horizontal);
+
+                addEntryProb(prob.floatValue(),true);
+                //RESPIRATION ADAPTATION
+                idxtmp.add(kk, i_aux);
+                double y = resp.RespirationAdaptation(kk, idxtmp, resp_adaptation);
+                kk++;
+
+                //YELLOW
+            } else if (th_value > prob && prob > (th_value - 0.1)) {
+                if (count > 0) {
+                    minute = minute.concat(" - ").concat(aux_time);
+                    arrayList.add(minute);
+                    count = 0;
+                    list_position++;
+                    num_seizures_detected++;
+                    adapter.notifyDataSetChanged();
+
+                }
+
+                traffic.setBackgroundResource(R.drawable.traffic_light_yellow_horizontal);
+
+                addEntryProb(prob.floatValue(),false);
+
+                //GREEN
+            } else {
+
+                traffic.setBackgroundResource(R.drawable.traffic_light_green_horizontal);
+
+
+                if (count > 0) {
+                    minute = minute.concat(" - ").concat(aux_time);
+                    arrayList.add(minute);
+                    list_position++;
+                    count = 0;
+                    adapter.notifyDataSetChanged();
+
+                }
+                addEntryProb(prob.floatValue(),false);
+
+
+            }
+            x1 += 1;
+            //position = position + 32 * shift_value;
+            i_aux++;
+
+        }
+    }
+
+    private double sixLayersCnn(double[][] input){
+
+        double[][] output1;
+        double[] output;
+        double prob;
+
+        output1 = CNN.Conv1D(input, fweights, true, true, dbias[0]);
+        output1 = CNN.Conv1D(output1, fweights2, true, true, dbias[1]);
+        output1 = CNN.Conv1D(output1, fweights3, true, true, dbias[2]);
+        output1 = CNN.BatchNormalization(output1, fweightsbn);
+        output1 = CNN.AveragePooling1D(output1, 8, 2);
+
+        output1 = CNN.Conv1D(output1, fweights4, true, true, dbias[3]);
+        output1 = CNN.Conv1D(output1, fweights5, true, true, dbias[4]);
+        output1 = CNN.AveragePooling1D(output1, 4, 2);
+
+        output1 = CNN.Conv1D(output1, fweights6, true, true, fbias6);
+        output = CNN.GlobalAveragePooling1D(output1);
+        output = CNN.SoftmaxActivation(output);
+
+        if(shift_value == 1){
+            buffer.addValue(output[1]);
+        }
+        if(shift_value==4){
+            for (int i=0; i <shift_value;i++){
+                buffer.addValue(output[1]);
+            }
+        }
+        if(shift_value == 8){
+            for(int i=0; i < shift_value; i++){
+                buffer.addValue(output[1]);
+            }
+        }
+        prob = CNN.MAF(buffer);
+
+        return prob;
+    }
+
+    private double elevenLayersCnn(double[][] input){
+        double[][] output1;
+        double[] output;
+        double prob;
+
+        output1 = CNN.Conv1D(input, fweights, true, true, dbias[0]);
+        output1 = CNN.Conv1D(output1, fweights2, true, true, dbias[1]);
+        output1 = CNN.Conv1D(output1, fweights3, true, true, dbias[2]);
+        output1 = CNN.BatchNormalization(output1, fweightsbn);
+        output1 = CNN.AveragePooling1D(output1, 8, 3);
+
+        output1 = CNN.Conv1D(output1, fweights4, true, true, dbias[3]);
+        output1 = CNN.Conv1D(output1, fweights5, true, true, dbias[4]);
+        output1 = CNN.Conv1D(output1, fweights6, true, true, dbias[5]);
+        output1 = CNN.BatchNormalization(output1, fweightsbn2);
+        output1 = CNN.AveragePooling1D(output1, 4, 3);
+
+        output1 = CNN.Conv1D(output1, fweights7, true, true, dbias[6]);
+        output1 = CNN.Conv1D(output1, fweights8, true, true, dbias[7]);
+        output1 = CNN.Conv1D(output1, fweights9, true, true, dbias[8]);
+        output1 = CNN.BatchNormalization(output1, fweightsbn3);
+        output1 = CNN.AveragePooling1D(output1, 2, 3);
+
+        output1 = CNN.Conv1D(output1, fweights10, true, true, dbias[9]);
+        output1 = CNN.Conv1D(output1, fweights11, true, true, fbias_short);
+        output = CNN.GlobalAveragePooling1D(output1);
+        output = CNN.SoftmaxActivation(output);
+
+        if(shift_value == 1){
+            buffer.addValue(output[1]);
+        }
+        if(shift_value==4){
+            for (int i=0; i <shift_value;i++){
+                buffer.addValue(output[1]);
+            }
+        }
+        if(shift_value == 8){
+            for(int i=0; i < shift_value; i++){
+                buffer.addValue(output[1]);
+            }
+        }
+        prob = CNN.MAF(buffer);
+        return prob;
     }
 }
 

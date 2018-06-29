@@ -6,7 +6,7 @@ Things to fix/change and new features to add
 
 1. Add white color to ListView in *res/layout/stetoscope_fragment*
 
-   - [ ] Done.
+   - [x] Done.
 
 2. Use parcelable instead of serializable when passing attributes between fragments.
 
@@ -142,7 +142,7 @@ The improvements listed bellow, are the result of the usability study carried ou
     $$
     unknown formula --> ask andriy
     $$
-
+    
     - [ ] Done.
 
 

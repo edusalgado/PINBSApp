@@ -286,7 +286,7 @@
         android:layout_height="251dp"
         android:layout_marginBottom="34dp"
         android:layout_marginLeft="33dp"
-        android:divider="@color/whiteAlpha"
+        android:divider="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
 
