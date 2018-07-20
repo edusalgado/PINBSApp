@@ -468,7 +468,7 @@
 
     <Button
         android:id="@+id/btn_soni"
-        android:layout_width="279dp"
+        android:layout_width="143dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
@@ -477,6 +477,23 @@
         android:text="Sonify"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/myRectangleout"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/myRectangleout"
+        app:layout_constraintTop_toTopOf="@+id/myRectangleout"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="143dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/myRectangleout"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/myRectangleout"
         app:layout_constraintTop_toTopOf="@+id/myRectangleout"
         app:layout_constraintVertical_bias="0.0" />

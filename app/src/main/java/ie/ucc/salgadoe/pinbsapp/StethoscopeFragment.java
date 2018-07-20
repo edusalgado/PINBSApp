@@ -1,14 +1,17 @@
 package ie.ucc.salgadoe.pinbsapp;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,8 +38,10 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -67,7 +72,7 @@ public class StethoscopeFragment extends Fragment {
     int chunkLength;
     Spinner options, baby, sp_speed;
     ListView list;
-    Button b_next, b_stop,b_reset,b_soni;
+    Button b_next, b_stop,b_reset,b_soni, b_save;
     TextView tv_output;
     TextView tv_output2, message_box, time;
     SeekBar sb;
@@ -85,6 +90,9 @@ public class StethoscopeFragment extends Fragment {
     FastCheckDialog dialog = new FastCheckDialog();
     ArrayList<Double> resp_adaptation = new ArrayList<>();
     ArrayList<Double> input_buffer = new ArrayList<>();
+    ArrayList<Double> prob_buffer = new ArrayList<>();
+
+    Context ctx;
 
     //Respiration Adaptation variables
     ArrayList<Integer> idxtmp = new ArrayList<>();
@@ -137,6 +145,10 @@ public class StethoscopeFragment extends Fragment {
 
     int buffer_aux = 0;
 
+    //Variable to update progressbar during buffer
+
+    runCnnBuffer progress = new runCnnBuffer();
+
 
     private int position = 0; // Seizure at 18688
     private int annotation = 24;  // Seizure at 584 //24 to start after buffer
@@ -160,7 +172,6 @@ public class StethoscopeFragment extends Fragment {
     public void readFiles11() {
 
         StringBuilder[] sb = new StringBuilder[16];
-
         try {
             int size;
             byte buffer[];
@@ -179,6 +190,7 @@ public class StethoscopeFragment extends Fragment {
                 is.read(buffer);
                 is.close();
                 sb[15] = new StringBuilder(new String(buffer));
+
             }
             if(baby_selected == 0){
                 is = getActivity().getAssets().open("input_long_19_02_2018.txt");
@@ -194,6 +206,7 @@ public class StethoscopeFragment extends Fragment {
                 is.read(buffer);
                 is.close();
                 sb[15] = new StringBuilder(new String(buffer));
+
 
             }
             if(baby_selected == 2){
@@ -213,6 +226,7 @@ public class StethoscopeFragment extends Fragment {
 
             }
 
+            progress.doProgress( 2);
 
 
             is = getActivity().getAssets().open("weightsconv1d_12_nospace.txt");
@@ -222,12 +236,18 @@ public class StethoscopeFragment extends Fragment {
             is.close();
             sb[1] = new StringBuilder(new String(buffer));
 
+            progress.doProgress(4);
+
+
             is = getActivity().getAssets().open("weightsconv1d_13_nospace.txt");
             size = is.available();
             buffer = new byte[size];
             is.read(buffer);
             is.close();
             sb[2] = new StringBuilder(new String(buffer));
+
+            progress.doProgress(6);
+
 
             is = getActivity().getAssets().open("weightsconv1d_14_nospace.txt");
             size = is.available();
@@ -236,12 +256,18 @@ public class StethoscopeFragment extends Fragment {
             is.close();
             sb[3] = new StringBuilder(new String(buffer));
 
+            progress.doProgress(8);
+
+
             is = getActivity().getAssets().open("weightsconv1d_15_nospace.txt");
             size = is.available();
             buffer = new byte[size];
             is.read(buffer);
             is.close();
             sb[4] = new StringBuilder(new String(buffer));
+
+            progress.doProgress(10);
+
 
             is = getActivity().getAssets().open("weightsconv1d_16_nospace.txt");
             size = is.available();
@@ -250,6 +276,8 @@ public class StethoscopeFragment extends Fragment {
             is.close();
             sb[5] = new StringBuilder(new String(buffer));
 
+            progress.doProgress(12);
+
             is = getActivity().getAssets().open("weightsconv1d_17_nospace.txt");
             size = is.available();
             buffer = new byte[size];
@@ -257,18 +285,25 @@ public class StethoscopeFragment extends Fragment {
             is.close();
             sb[6] = new StringBuilder(new String(buffer));
 
+            progress.doProgress(14);
+
             is = getActivity().getAssets().open("weightsconv1d_18_nospace.txt");
             size = is.available();
             buffer = new byte[size];
             is.read(buffer);
             is.close();
             sb[7] = new StringBuilder(new String(buffer));
+
+            progress.doProgress(16);
+
             is = getActivity().getAssets().open("weightsconv1d_19_nospace.txt");
             size = is.available();
             buffer = new byte[size];
             is.read(buffer);
             is.close();
             sb[8] = new StringBuilder(new String(buffer));
+
+            progress.doProgress(18);
 
             is = getActivity().getAssets().open("weightsconv1d_20_nospace.txt");
             size = is.available();
@@ -277,12 +312,16 @@ public class StethoscopeFragment extends Fragment {
             is.close();
             sb[9] = new StringBuilder(new String(buffer));
 
+            progress.doProgress(20);
+
             is = getActivity().getAssets().open("weightsconv1d_21_nospace.txt");
             size = is.available();
             buffer = new byte[size];
             is.read(buffer);
             is.close();
             sb[10] = new StringBuilder(new String(buffer));
+
+            progress.doProgress(22);
 
             is = getActivity().getAssets().open("weightsconv1d_22_nospace.txt");
             size = is.available();
@@ -291,12 +330,17 @@ public class StethoscopeFragment extends Fragment {
             is.close();
             sb[11] = new StringBuilder(new String(buffer));
 
+            progress.doProgress(24);
+
             is = getActivity().getAssets().open("weightsbatch_normalization_4_nospace.txt");
             size = is.available();
             buffer = new byte[size];
             is.read(buffer);
             is.close();
             sb[12] = new StringBuilder(new String(buffer));
+
+            progress.doProgress(26);
+
 
             is = getActivity().getAssets().open("weightsbatch_normalization_5_nospace.txt");
             size = is.available();
@@ -305,12 +349,17 @@ public class StethoscopeFragment extends Fragment {
             is.close();
             sb[13] = new StringBuilder(new String(buffer));
 
+            progress.doProgress(28);
+
             is = getActivity().getAssets().open("weightsbatch_normalization_6_nospace.txt");
             size = is.available();
             buffer = new byte[size];
             is.read(buffer);
             is.close();
             sb[14] = new StringBuilder(new String(buffer));
+
+            progress.doProgress(30);
+
 
 
         } catch (IOException ex) {
@@ -335,6 +384,9 @@ public class StethoscopeFragment extends Fragment {
         String[] linesbn2 = sb[13].toString().split(System.getProperty("line.separator"));
         String[] linesbn3 = sb[14].toString().split(System.getProperty("line.separator"));
         String[] linesin_an = sb[15].toString().split(System.getProperty("line.separator"));
+
+        progress.doProgress(32);
+
 
         inputlen = linesin.length;
         int anlen = linesin_an.length;
@@ -381,6 +433,8 @@ public class StethoscopeFragment extends Fragment {
         dbias = new double[10][32];
         fbias_short = new double[2];
 
+        progress.doProgress(34);
+
         String[] row;
         for (int i = 0; i < inputlen; i++) {
             row = linesin[i].split(" ");
@@ -388,16 +442,22 @@ public class StethoscopeFragment extends Fragment {
             finput[i][0] = Double.parseDouble(m_in[i][0]);
         }
 
+        progress.doProgress(36);
+
         for(int i = 0; i < anlen; i++){
             row = linesin_an[i].split(" ");
             m_in_an[i] = row;
         }
+
+        progress.doProgress(38);
 
         for (int i = 32, len = linesw1.length; i < len; i++) {
             linesw1[i] = linesw1[i].replace("\r", "");
             row = linesw1[i].split(" ");
             w_in[i - 32] = row;
         }
+        progress.doProgress(48);
+
         for (int i = 32; i < weightslen; i++) {
             linesw2[i] = linesw2[i].replace("\r", "");
             row = linesw2[i].split(" ");
@@ -427,11 +487,15 @@ public class StethoscopeFragment extends Fragment {
             row = linesw10[i].split(" ");
             w10_in[i - 32] = row;
         }
+        progress.doProgress(50);
+
         for (int i = 2, len = linesw11.length; i < len; i++) {
             linesw11[i] = linesw11[i].replace("\r", "");
             row = linesw11[i].split(" ");
             w11_in[i - 2] = row;
         }
+        progress.doProgress(55);
+
         for (int i = 0, len = linesbn.length; i < len; i++) {
             linesbn[i] = linesbn[i].replace("\r", "");
             row = linesbn[i].split(" ");
@@ -443,6 +507,8 @@ public class StethoscopeFragment extends Fragment {
             row = linesbn3[i].split(" ");
             bn3_in[i] = row;
         }
+        progress.doProgress(58);
+
         for (int i = 0; i < 32; i++) {
             linesw1[i] = linesw1[i].replace("\r", "");
             dbias[0][i] = Double.parseDouble(linesw1[i]);
@@ -465,16 +531,22 @@ public class StethoscopeFragment extends Fragment {
             linesw10[i] = linesw10[i].replace("\r", "");
             dbias[9][i] = Double.parseDouble(linesw10[i]);
         }
+        progress.doProgress(65);
+
         for (int i = 0; i < 2; i++) {
             linesw11[i] = linesw11[i].replace("\r", "");
             bias_short[i] = linesw11[i];
         }
+
+        progress.doProgress(68);
 
         for (int i = 0, len = linesw1.length - 32; i < len; i++) {
             for (int j = 0; j < 3; j++) {
                 fweights[i][j] = Double.parseDouble(w_in[i][j]);
             }
         }
+        progress.doProgress(70);
+
         for (int i = 0; i < w32; i++) {
             for (int j = 0; j < 3; j++) {
                 fweights2[i][j] = Double.parseDouble(w2_in[i][j]);
@@ -488,14 +560,21 @@ public class StethoscopeFragment extends Fragment {
                 fweights10[i][j] = Double.parseDouble(w10_in[i][j]);
             }
         }
+
+        progress.doProgress(75);
+
         for (int i = 0, len = linesw11.length - 2; i < len; i++) {
             for (int j = 0; j < 3; j++) {
                 fweights11[i][j] = Double.parseDouble(w11_in[i][j]);
             }
         }
+        progress.doProgress(78);
+
         for (int i = 0; i < 2; i++) {
             fbias_short[i] = Double.parseDouble(bias_short[i]);
         }
+        progress.doProgress(80);
+
         for (int i = 0, len = linesbn.length; i < len; i++) {
             for (int j = 0; j < 32; j++) {
                 fweightsbn[i][j] = Double.parseDouble(bn_in[i][j]);
@@ -504,10 +583,14 @@ public class StethoscopeFragment extends Fragment {
 
             }
         }
+        progress.doProgress(83);
+
         for(int i = 0; i<anlen;i++){
             flabel[i] = Double.parseDouble(m_in_an[i][0]);
         }
-        BufferRun.run();
+        progress.doProgress(85);
+        //TODO adapt buffer function in asynctask
+        //BufferRun.run();
 
     }
     public void readFiles6(){
@@ -1063,6 +1146,7 @@ public class StethoscopeFragment extends Fragment {
         b_stop =  view.findViewById(R.id.b_stop);
         b_reset =  view.findViewById(R.id.b_reset);
         b_soni = view.findViewById(R.id.btn_soni);
+        b_save = view.findViewById(R.id.btn_save);
 
         tv_output2 =  view.findViewById(R.id.tv_output2);
         time=  view.findViewById(R.id.time);
@@ -1195,6 +1279,7 @@ public class StethoscopeFragment extends Fragment {
 
                             double[][] input = new double[256][1]; //256 samples each epoch
                             int len_buffer = 48 ; //We don't want the last value of the buffer. Will be computed in next! Always like shift by 1
+                            prob_buffer.add((double)shift_value); // Adding the shift value in the first position in order to know the shift once the signal is saved and loaded in the review mode
 
                             for (int b = 0; b < len_buffer/shift_value; b++) {
                                 for (int i = position; i < position + 256; i++) {
@@ -1228,6 +1313,7 @@ public class StethoscopeFragment extends Fragment {
                                     output1 = CNN.Conv1D(output1, fweights11, true, true, fbias_short);
                                     output = CNN.GlobalAveragePooling1D(output1);
                                     output = CNN.SoftmaxActivation(output);
+
 
                                     //This ifs conditions helps system to change shift in real time
                                     if(shift_value == 1){
@@ -1264,6 +1350,7 @@ public class StethoscopeFragment extends Fragment {
                                     output = CNN.GlobalAveragePooling1D(output1);
                                     output = CNN.SoftmaxActivation(output);
 
+
                                     //This ifs conditions helps system to change shift in real time
                                     if(shift_value == 1){
                                     buffer.addValue(output[1]);
@@ -1287,7 +1374,7 @@ public class StethoscopeFragment extends Fragment {
 
                             //TODO Chapuza mientras buffer no esta dentro de feedEEG
                             for(int i =0; i<position;i++){
-                                addEntryEeg((float)finput[i][0]);
+                                //addEntryEeg((float)finput[i][0]);
                                 input_buffer.add(i,finput[i][0]);
                             }
                             timer.add(Calendar.SECOND, 24);
@@ -1558,6 +1645,9 @@ public class StethoscopeFragment extends Fragment {
                         Toast.makeText(getActivity(), "Select a baby before buffer!", Toast.LENGTH_LONG).show();
 
                     } else if (buffer_aux == 0) {
+                        new runCnnBuffer().execute();
+
+                        /*
                         progressBar.setVisibility(View.VISIBLE);
 
                         new Thread(new Runnable() {
@@ -1589,28 +1679,29 @@ public class StethoscopeFragment extends Fragment {
                                 }
                             }
                         }).start();
+                            if (layers_6_11 == 0) { //Read weights from 6
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        readFiles6();
+                                    }
+                                }).start();
+                            } else if (layers_6_11 == 1) {//Read weights from 11
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        readFiles11();
+                                    }
 
-                        if (layers_6_11 == 0) { //Read weights from 6
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    readFiles6();
-                                }
-                            }).start();
-                        } else if (layers_6_11 == 1) {//Read weights from 11
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    readFiles11();
-                                }
+                                }).start();
 
-                            }).start();
+                            }
+                            b_next.setText("Buffering...");
+                            message_box.setText("Buffering please wait!");
 
-                        }
-                        b_next.setText("Buffering...");
-                        message_box.setText("Buffering please wait!");
+                            stop = 1;
+                            */
 
-                        stop = 1;
                     } else {
                         if (stop == 1) {
                             //mTimer.run();
@@ -1647,6 +1738,19 @@ public class StethoscopeFragment extends Fragment {
             }
         });
 
+        b_save.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(View v) {
+                if(stop == 1){
+                    //Toast.makeText(getActivity(),"Saving...",Toast.LENGTH_LONG).show();
+                    writeResults(input_buffer,prob_buffer);
+                }
+                else{
+                    Toast.makeText(getActivity(),"Acquisition running, press stop first!", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         b_reset.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1859,8 +1963,182 @@ public class StethoscopeFragment extends Fragment {
         }
     }
 
-    //Esto va a ser para probar asynktask en el main thread y ver si es posible evitar los parones de UI. PARECE QUE FUNCIONA CORRECTAMENTE
+    //Esto va a ser para probar asynktask en el main thread y ver si es posible evitar los parones de UI. PARECE QUE FUNCIONA CORRECTAMENTE -> Se va a realizar también para el Buffer, es la mejor opcin que he encontrado hasta la fecha.
     //IMP adaptacion respiracion no implementada en dicho metodo. O extraer del anterior o obviarla momentaneamente.
+
+    private class runCnnBuffer extends AsyncTask<Void,Integer,Double>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            timer.set(Calendar.HOUR_OF_DAY,0);
+            timer.set(Calendar.MINUTE, 0);
+            timer.set(Calendar.SECOND, 0);
+            timer.set(Calendar.HOUR_OF_DAY, 0);
+            b_next.setText("Buffering...");
+            message_box.setText("Buffering please wait!");
+            progressBar.setVisibility(View.VISIBLE);
+
+        }
+
+        @Override
+        protected Double doInBackground(Void... voids) {
+            //Function to read text files with weights to build the model of the CNN
+            if(layers_6_11==1) readFiles11();
+            else if(layers_6_11==0) readFiles6();
+
+            //The buffer uses the MAF duration taking into account the shift value
+
+            buffer = new Buffer(48 + 1); //48 seconds of MAF
+
+            double[][] input = new double[256][1];
+            int len_buffer = 48;
+            prob_buffer.add((double)shift_value);// Adding the shift value in the first position in order to know the shift once the signal is saved and loaded in the review mode
+
+            for(int b= 0; b< len_buffer/shift_value; b++){
+                for (int i = position; i < position + 256; i++) {
+                    input[i - position][0] = finput[i][0];
+                }
+
+                double[][] output1;
+                double[] output;
+                //11LAYERS
+                if (layers_6_11 == 1) {
+                    output1 = CNN.Conv1D(input, fweights, true, true, dbias[0]);
+                    output1 = CNN.Conv1D(output1, fweights2, true, true, dbias[1]);
+                    output1 = CNN.Conv1D(output1, fweights3, true, true, dbias[2]);
+                    output1 = CNN.BatchNormalization(output1, fweightsbn);
+                    output1 = CNN.AveragePooling1D(output1, 8, 3);
+
+                    output1 = CNN.Conv1D(output1, fweights4, true, true, dbias[3]);
+                    output1 = CNN.Conv1D(output1, fweights5, true, true, dbias[4]);
+                    output1 = CNN.Conv1D(output1, fweights6, true, true, dbias[5]);
+                    output1 = CNN.BatchNormalization(output1, fweightsbn2);
+                    output1 = CNN.AveragePooling1D(output1, 4, 3);
+
+                    output1 = CNN.Conv1D(output1, fweights7, true, true, dbias[6]);
+                    output1 = CNN.Conv1D(output1, fweights8, true, true, dbias[7]);
+                    output1 = CNN.Conv1D(output1, fweights9, true, true, dbias[8]);
+                    output1 = CNN.BatchNormalization(output1, fweightsbn3);
+                    output1 = CNN.AveragePooling1D(output1, 2, 3);
+
+                    output1 = CNN.Conv1D(output1, fweights10, true, true, dbias[9]);
+                    output1 = CNN.Conv1D(output1, fweights11, true, true, fbias_short);
+                    output = CNN.GlobalAveragePooling1D(output1);
+                    output = CNN.SoftmaxActivation(output);
+
+
+                    //This ifs conditions helps system to change shift in real time
+                    if(shift_value == 1){
+                        buffer.addValue(output[1]);
+                    }
+                    if(shift_value==4){
+                        for (int i=0; i <shift_value;i++){
+                            buffer.addValue(output[1]);
+                        }
+                    }
+                    if(shift_value == 8){
+                        for(int i=0; i < shift_value; i++){
+                            buffer.addValue(output[1]);
+                        }
+                    }
+
+                }
+                //6LAYERS
+                if (layers_6_11 == 0) {
+
+                    output1 = CNN.Conv1D(input, fweights, true, true, dbias[0]);
+                    output1 = CNN.Conv1D(output1, fweights2, true, true, dbias[1]);
+                    output1 = CNN.Conv1D(output1, fweights3, true, true, dbias[2]);
+
+                    output1 = CNN.BatchNormalization(output1, fweightsbn);
+                    output1 = CNN.AveragePooling1D(output1, 8, 2);
+
+                    output1 = CNN.Conv1D(output1, fweights4, true, true, dbias[3]);
+                    output1 = CNN.Conv1D(output1, fweights5, true, true, dbias[4]);
+                    output1 = CNN.AveragePooling1D(output1, 4, 2);
+
+                    output1 = CNN.Conv1D(output1, fweights6, true, true, fbias6);
+                    output = CNN.GlobalAveragePooling1D(output1);
+                    output = CNN.SoftmaxActivation(output);
+
+
+                    //This ifs conditions helps system to change shift in real time
+                    if(shift_value == 1){
+                        buffer.addValue(output[1]);
+                    }
+                    if(shift_value==4){
+                        for (int i=0; i <shift_value;i++){
+                            buffer.addValue(output[1]);
+                        }
+                    }
+                    if(shift_value == 8){
+                        for(int i=0; i < shift_value; i++){
+                            buffer.addValue(output[1]);
+                        }
+                    }
+                }
+                position = position + (32 * shift_value);
+
+
+            }
+            //Now we add the piece of signal acquired in the buffer section to the signal buffer
+            progress.doProgress(90);
+            for(int i =0; i<position;i++){
+                /*If the buffered signal is considered to be shown in the graph uncomment the code below.
+                 * I suggest to add all the entries add once with a loop instead of using the same function
+                  * feedEEG is using (addEntryEeg)*/
+                //addEntryEeg((float)finput[i][0]);
+                input_buffer.add(i,finput[i][0]);
+            }
+            progress.doProgress(95);
+            timer.add(Calendar.SECOND, 24);
+
+            /*CONFIGURE PHASEVOCODER */
+
+            vocoder.configure();
+
+            /*Initialising chunk and Vocoder */
+            chunkLength = vocoder.getChunkLength();
+
+            double[] chunk = new double[chunkLength];
+            for(int i =0; i < vocoder.getHop(); i++){
+                chunk[i] = 0;
+            }
+
+            for (int i = vocoder.getHop(); i < chunkLength; i++){
+                chunk[i] = input_buffer.get((position-chunkLength-vocoder.getHop())+i);
+            }
+            progress.doProgress(98);
+            vocoder.initialiseVocoder(chunk);
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Double aDouble) {
+            super.onPostExecute(aDouble);
+            buffer_aux =1;
+            time.append(datef.format(timer.getTime()));
+            b_next.setText("Start"); //Change for scanning directly
+            message_box.setText("Buffer filled successfully. \n Press start button! ");
+            progressBar.setVisibility(View.INVISIBLE);
+            //feedEeg.run();
+            stop = 1;
+
+        }
+
+        public void doProgress(int value) {
+            publishProgress(value);
+
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            progressBar.setProgress(values[0]);
+        }
+    }
 
     private class runCnn extends  AsyncTask<Void,Double,Double>{
 
@@ -2002,6 +2280,8 @@ public class StethoscopeFragment extends Fragment {
         }
         prob = CNN.MAF(buffer);
 
+        prob_buffer.add(prob);
+
         return prob;
     }
 
@@ -2047,8 +2327,52 @@ public class StethoscopeFragment extends Fragment {
             }
         }
         prob = CNN.MAF(buffer);
+        prob_buffer.add(prob);
+
         return prob;
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void writeResults(ArrayList<Double> input, ArrayList<Double> probabilities) {
+        final String FNAME = "test.txt";
+        //String text = "prueba";
+        OutputStreamWriter outputWriter = null;
+        FileOutputStream fileout = null;
+
+
+        try{
+            fileout = getActivity().openFileOutput(FNAME,Context.MODE_PRIVATE);
+            outputWriter = new OutputStreamWriter(fileout);
+            //fileout.write(text.getBytes());
+            for (Double line : input){
+                outputWriter.write(line.toString()+ " \n");
+            }
+            outputWriter.write("END INPUT \n");
+            for(Double line : probabilities){
+                outputWriter.write(line.toString()+" \n");
+            }
+            outputWriter.write("END PROBABILITIES");
+
+            Toast.makeText(getActivity(),"Saved at"+ getActivity().getFilesDir()+"/"+FNAME,Toast.LENGTH_LONG).show();
+
+        }catch (Exception e){
+            Toast.makeText(getActivity(),"Problem saving file",Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }finally {
+            if (fileout != null){
+                try {
+                    outputWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+
+    }
+
+
 }
+
 
 
